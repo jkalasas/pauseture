@@ -15,46 +15,95 @@ class TrainingPage(tk.Frame):
     def __init__(self, parent, controller, settings):
         super().__init__(parent)
         self.controller = controller
-        self.settings = settings  # Use the provided settings instance
-        label = tk.Label(self, text="Training Page", font=("Helvetica", 18, "bold"))
-        label.pack(side="top", fill="x", pady=10)
+        self.settings = settings
+        self.configure(bg="#F5F5F5")  # Match StartPage background
 
-        self.label = tk.Label(self)
-        self.label.pack()
+        # Header frame
+        header_frame = tk.Frame(self, bg="#F5F5F5")
+        header_frame.pack(pady=20)
+        
+        label = tk.Label(header_frame, text="Training Mode", font=("Helvetica Neue", 24, "bold"), bg="#F5F5F5", fg="#2C3E50")
+        label.pack()
 
-        button_frame = tk.Frame(self)
-        button_frame.pack(side="bottom", fill="x", pady=10)
+        # Camera preview
+        self.label = tk.Label(self, bg="#F5F5F5")
+        self.label.pack(pady=10)
 
-        self.capture_good_button = tk.Button(button_frame, text="Capture Good Posture", command=self.capture_good_posture)
-        self.capture_good_button.pack(side="left", padx=5)
+        # Button style configuration
+        button_style = {
+            'font': ('Helvetica Neue', 12),
+            'width': 20,  # Made wider for better appearance
+            'height': 2,
+            'bd': 0,
+            'relief': 'solid',
+            'fg': '#2C3E50',
+            'bg': 'white',
+            'activeforeground': '#2C3E50',
+            'borderwidth': 0
+        }
 
-        self.capture_bad_button = tk.Button(button_frame, text="Capture Bad Posture", command=self.capture_bad_posture)
-        self.capture_bad_button.pack(side="left", padx=5)
+        # Make button positions class attributes
+        self.button_width = 200  # pixels
+        self.button_height = 40
+        self.padding = 20
+        
+        # Calculate positions as class attributes
+        self.top_y = 400
+        self.bottom_y = 460
 
-        self.train_button = tk.Button(button_frame, text="Train Model", command=self.train_model)
-        self.train_button.pack(side="left", padx=5)
+        # Calculate x positions for 3 buttons (centered)
+        self.left_x = (1024 - (3 * self.button_width + 2 * self.padding)) // 2
+        self.middle_x = self.left_x + self.button_width + self.padding
+        self.right_x = self.middle_x + self.button_width + self.padding
 
-        self.stop_button = tk.Button(button_frame, text="Stop Capture", command=self.stop_capture)
-        self.stop_button.pack(side="left", padx=5)
-        self.stop_button.pack_forget()  # Hide initially
+        # Create and place top row buttons
+        self.capture_good_button = tk.Button(self, text="Capture Good Posture", 
+                                           command=self.capture_good_posture, **button_style)
+        self.capture_good_button.place(x=self.left_x, y=self.top_y, 
+                                     width=self.button_width, height=self.button_height)
 
-        self.back_button = tk.Button(button_frame, text="Back", command=lambda: controller.show_frame("StartPage"))
-        self.back_button.pack(side="left", padx=5)
+        self.capture_bad_button = tk.Button(self, text="Capture Bad Posture", 
+                                          command=self.capture_bad_posture, **button_style)
+        self.capture_bad_button.place(x=self.middle_x, y=self.top_y, width=self.button_width, height=self.button_height)
 
-        self.clear_button = tk.Button(button_frame, text="Clear Images", command=self.clear_images)
-        self.clear_button.pack(side="left", padx=5)
+        self.stop_button = tk.Button(self, text="Stop Capture", 
+                                   command=self.stop_capture, **button_style)
+        self.stop_button.place(x=self.right_x, y=self.top_y, width=self.button_width, height=self.button_height)
+        self.stop_button.place_forget()  # Hide initially
 
-        self.progress_label = tk.Label(self, text="")
-        self.progress_label.pack(side="top", fill="x", pady=5)
+        # Create and place bottom row buttons
+        self.train_button = tk.Button(self, text="Train Model", 
+                                    command=self.train_model, **button_style)
+        self.train_button.place(x=self.left_x, y=self.bottom_y, width=self.button_width, height=self.button_height)
+
+        self.clear_button = tk.Button(self, text="Clear Images", 
+                                    command=self.clear_images, **button_style)
+        self.clear_button.place(x=self.middle_x, y=self.bottom_y, width=self.button_width, height=self.button_height)
+
+        self.back_button = tk.Button(self, text="Back", 
+                                   command=lambda: controller.show_frame("StartPage"), **button_style)
+        self.back_button.place(x=self.right_x, y=self.bottom_y, width=self.button_width, height=self.button_height)
+
+        # Status labels with modern styling
+        status_style = {'bg': "#F5F5F5", 'fg': "#2C3E50", 'font': ("Helvetica Neue", 10)}
+        
+        self.progress_label = tk.Label(self, text="", **status_style)
+        self.progress_label.pack(pady=5)
 
         self.good_image_count = len(os.listdir(f'{self.settings.training_dir}/action_01')) if os.path.exists(f'{self.settings.training_dir}/action_01') else 0
         self.bad_image_count = len(os.listdir(f'{self.settings.training_dir}/action_02')) if os.path.exists(f'{self.settings.training_dir}/action_02') else 0
 
-        self.good_count_label = tk.Label(self, text=f"Good Posture Images: {self.good_image_count}")
-        self.good_count_label.pack(side="top", fill="x", pady=5)
+        self.good_count_label = tk.Label(self, text=f"Good Posture Images: {self.good_image_count}", **status_style)
+        self.good_count_label.pack(pady=2)
 
-        self.bad_count_label = tk.Label(self, text=f"Bad Posture Images: {self.bad_image_count}")
-        self.bad_count_label.pack(side="top", fill="x", pady=5)
+        self.bad_count_label = tk.Label(self, text=f"Bad Posture Images: {self.bad_image_count}", **status_style)
+        self.bad_count_label.pack(pady=2)
+
+        # Setup hover effects for all buttons
+        for button in [self.capture_good_button, self.capture_bad_button, self.stop_button,
+                      self.train_button, self.clear_button, self.back_button]:
+            button.bind('<Enter>', lambda e, btn=button: self._on_enter(btn))
+            button.bind('<Leave>', lambda e, btn=button: self._on_leave(btn))
 
         self.videocapture = None
         self.capturing = False
@@ -64,6 +113,13 @@ class TrainingPage(tk.Frame):
 
         self.threads = []
         self.stop_event = threading.Event()
+
+        # Modify show/hide behavior for stop button
+        def stop_capture_wrapper():
+            self.stop_capture()
+            self.stop_button.place_forget()
+            
+        self.stop_button.configure(command=stop_capture_wrapper)
 
     def start_camera(self):
         pass
@@ -76,7 +132,8 @@ class TrainingPage(tk.Frame):
     def capture_good_posture(self):
         self.capturing = True
         self.disable_buttons()
-        self.stop_button.pack(side="left", padx=5)  # Show stop button
+        self.stop_button.place(x=self.right_x, y=self.top_y, 
+                             width=self.button_width, height=self.button_height)
         thread = threading.Thread(target=self.do_capture_action, args=(1, 'Good'))
         self.threads.append(thread)
         thread.start()
@@ -84,7 +141,8 @@ class TrainingPage(tk.Frame):
     def capture_bad_posture(self):
         self.capturing = True
         self.disable_buttons()
-        self.stop_button.pack(side="left", padx=5)  # Show stop button
+        self.stop_button.place(x=self.right_x, y=self.top_y, 
+                             width=self.button_width, height=self.button_height)
         thread = threading.Thread(target=self.do_capture_action, args=(2, 'Bad'))
         self.threads.append(thread)
         thread.start()
@@ -92,7 +150,7 @@ class TrainingPage(tk.Frame):
     def stop_capture(self):
         self.capturing = False
         self.enable_buttons()
-        self.stop_button.pack_forget()  # Hide stop button
+        self.stop_button.place_forget()  # Use place_forget instead of pack_forget
         self.stop_camera()
         self.label.configure(image=self.placeholder_image)
 
@@ -223,3 +281,19 @@ class TrainingPage(tk.Frame):
 
     def on_close(self):
         self.cleanup_threads()
+
+    def _on_enter(self, button):
+        """Subtle hover effect"""
+        button.configure(
+            bg='#000000',
+            fg='white',
+            font=('Helvetica Neue', 12, 'bold')
+        )
+
+    def _on_leave(self, button):
+        """Reset button state"""
+        button.configure(
+            bg='white',
+            fg='#2C3E50',
+            font=('Helvetica Neue', 12)
+        )

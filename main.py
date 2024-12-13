@@ -6,7 +6,7 @@ class PostureApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Pauseture")
-        self.geometry("800x600")
+        self.geometry("800x600")  # Changed from 800x600
         self.frames = {}
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -25,6 +25,12 @@ class PostureApp(tk.Tk):
 
     def show_frame(self, page_name):
         self.settings.load_settings()  # Reload settings
+        # Set window size based on page
+        if page_name == "TrainingPage":
+            self.geometry("1024x768")
+        else:
+            self.geometry("800x600")
+            
         frame = self.frames[page_name]
         frame.tkraise()
         if page_name == "LiveViewPage":
